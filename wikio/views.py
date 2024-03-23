@@ -74,7 +74,7 @@ def editPage(request):
         })
 
 
-def search(request, ):
+def search(request):
     search_keyword = request.POST.get("q")
     database_content_title = Entry.objects.all()
     for list in database_content_title:
