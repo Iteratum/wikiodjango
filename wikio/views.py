@@ -38,7 +38,6 @@ def newPage(request):
         title = request.POST.get("title")
         content = request.POST.get("content")
         thumbnail = request.FILES.get("thumbnail")
-        print(thumbnail)
         
         title_exists = Entry.objects.filter(title__contains=title).exists()
         if title_exists:
@@ -73,22 +72,29 @@ def editPage(request):
             "content": saved_cont
         })
 
-
+@api_view(['GET'])
 def search(request):
-    search_keyword = request.POST.get("q")
-    database_content_title = Entry.objects.all()
-    for list in database_content_title:
-        if search_keyword.lower() == str(list).lower():
-            body = markdown.markdown(util.get_entry(search_keyword))
-            return render(request, "wikio/entries.html", {
-            "title": search_keyword,
-            "content": body
-        })
-        else:
-            if search_keyword.lower() in str(list).lower():
-                sub_list = [i for i in database_content_title if search_keyword.lower() in str(i).lower()]
-                return render(request, "wikio/search.html", {
-                    "title": search_keyword,
-                    "recs": sub_list
-                })
+    if request.method == "GET":
+        search_keyword = request.GET.get('title', '')
+        database_content = Entry.objects.all()
+        filtered_titles = Entry.objects.filter(title__icontains=search_keyword)
+        #titles = [i for i in filtered_titles if search_keyword.lower() in str(i).lower()]
+        #if filtered_titles is None:
+            #return HttpResponse("No title with keyword not found")
+        #else:
+        serializer = EntrySerializer(filtered_titles, many=True)
+        return Response(serializer.data)
+        
+    #for list in database_content_title:
+        #if search_keyword.lower() == str(list).lower():
+           # body = markdown.markdown(util.get_entry(search_keyword))
+            #return render(request, "wikio/entries.html", {
+            #"title": search_keyword,
+            #"content": body
+        #})
+        #else:
+            #if search_keyword.lower() in str(list).lower():
+                #sub_list = [i for i in database_content_title if search_keyword.lower() in str(i).lower()]
+                #serialzer = EntrySerializer(sub_list, many=True)
+                #Response(serialzer.data)
             
